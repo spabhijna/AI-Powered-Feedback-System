@@ -1,0 +1,16 @@
+[project]
+name = "feedback-system"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiosqlite>=0.20.0",
+    "fastapi>=0.129.2",
+    "textblob>=0.19.0",
+    "tortoise-orm>=1.1.5",
+    "uvicorn>=0.41.0",
+]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
