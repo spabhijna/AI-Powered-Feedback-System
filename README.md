@@ -184,7 +184,7 @@ Get up and running in under 2 minutes:
 
 ```bash
 # Clone and navigate
-git clone <repository-url>
+git clone https://github.com/spabhijna/AI-Powered-Feedback-System
 cd feedback_system
 
 # Start with Docker Compose
@@ -200,7 +200,7 @@ docker-compose logs -f
 
 ```bash
 # Clone and navigate
-git clone <repository-url>
+git clone https://github.com/spabhijna/AI-Powered-Feedback-System
 cd feedback_system
 
 # Setup with uv (recommended)
@@ -235,7 +235,7 @@ Ensure you have the following installed:
 #### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/spabhijna/AI-Powered-Feedback-System
 cd feedback_system
 ```
 
@@ -310,7 +310,7 @@ The easiest way to deploy is using Docker Compose:
 
 ```bash
 # Clone and navigate
-git clone <repository-url>
+git clone https://github.com/spabhijna/AI-Powered-Feedback-System
 cd feedback_system
 
 # Start all services

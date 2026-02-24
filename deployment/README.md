@@ -20,7 +20,7 @@ docker-compose --version
 ### 1. Clone and Navigate to Project
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/spabhijna/AI-Powered-Feedback-System
 cd feedback_system
 ```
 
