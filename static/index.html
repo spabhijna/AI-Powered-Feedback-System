@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Feedback Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>🤖 AI Feedback Dashboard</h1>
+                    <p class="subtitle">Real-time feedback analytics powered by transformers</p>
+                </div>
+                <button id="dark-mode-toggle" class="theme-toggle" title="Toggle dark mode">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Submit Feedback Section -->
+        <section class="submit-section">
+            <h2>💬 Submit Feedback</h2>
+            <form id="feedback-form" class="feedback-form">
+                <textarea 
+                    id="feedback-text" 
+                    placeholder="Tell us what you think... (AI will automatically analyze sentiment, category, and priority)"
+                    rows="3"
+                    required
+                ></textarea>
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                    <span class="btn-text">Submit Feedback</span>
+                    <span class="btn-loader" style="display: none;">Processing...</span>
+                </button>
+            </form>
+            <div id="submit-status" class="status-message"></div>
+        </section>
+
+        <!-- CSV Upload Section -->
+        <section class="upload-section">
+            <h2>📁 Bulk Upload</h2>
+            <div class="upload-container">
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <span class="upload-icon">📤</span>
+                        <p class="drop-zone-text">Drag & drop CSV file here</p>
+                        <p class="drop-zone-subtext">or</p>
+                        <label for="file-input" class="btn btn-secondary">Choose File</label>
+                        <input type="file" id="file-input" accept=".csv" style="display: none;">
+                        <p class="drop-zone-hint">CSV must have a 'text' column</p>
+                    </div>
+                </div>
+                <div id="upload-status" class="status-message"></div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="analytics-section">
+            <h2>📊 Analytics Overview</h2>
+            <div id="stats" class="stats-grid">
+                <div class="skeleton-loader"></div>
+            </div>
+            <div id="insight" class="insight-box"></div>
+            
+            <!-- Charts -->
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Sentiment Distribution</h3>
+                    <canvas id="sentiment-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Category Breakdown</h3>
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <h2>🔍 Filters</h2>
+            <div class="filter-controls">
+                <select id="category-filter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="technical">Technical</option>
+                    <option value="billing">Billing</option>
+                    <option value="performance">Performance</option>
+                    <option value="general">General</option>
+                </select>
+
+                <select id="sentiment-filter" class="filter-select">
+                    <option value="">All Sentiments</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+
+                <select id="priority-filter" class="filter-select">
+                    <option value="">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <select id="source-filter" class="filter-select">
+                    <option value="">All Sources</option>
+                    <option value="web">Web Form</option>
+                    <option value="csv">CSV Upload</option>
+                    <option value="api">API</option>
+                    <option value="email">Email</option>
+                    <option value="test">Test</option>
+                </select>
+
+                <button id="reset-filters" class="btn btn-secondary">Reset Filters</button>
+            </div>
+        </section>
+
+        <!-- Feedback List Section -->
+        <section class="feedback-section">
+            <div class="feedback-header-bar">
+                <h2>💬 Feedback List</h2>
+                <div class="feedback-count" id="feedback-count">Loading...</div>
+            </div>
+            <div id="feedback-list-container">
+                <ul id="feedback-list" class="feedback-list">
+                    <li class="skeleton-loader"></li>
+                </ul>
+                <!-- Pagination -->
+                <div id="pagination" class="pagination" style="display: none;">
+                    <button id="prev-page" class="btn btn-secondary">← Previous</button>
+                    <span id="page-info" class="page-info">Page 1</span>
+                    <button id="next-page" class="btn btn-secondary">Next →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="/static/config.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

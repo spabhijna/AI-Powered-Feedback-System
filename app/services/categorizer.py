@@ -1,11 +1,16 @@
-def categorize(text: str):
-    text = text.lower()
+"""Category classification service - wrapper around zero-shot model"""
 
-    if "payment" in text or "price" in text:
-        return "billing"
-    elif "bug" in text or "error" in text:
-        return "technical"
-    elif "slow" in text or "delay" in text:
-        return "performance"
-    else:
-        return "general"
+from app.services.category_model import (
+    categorize as model_categorize,
+    categorize_with_confidence,
+)
+
+
+def categorize(text: str) -> str:
+    """Categorize feedback using zero-shot classification (backward compatible)"""
+    return model_categorize(text)
+
+
+def categorize_detailed(text: str) -> tuple[str, float]:
+    """Categorize with confidence score for internal use"""
+    return categorize_with_confidence(text)
