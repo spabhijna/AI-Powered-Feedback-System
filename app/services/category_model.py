@@ -16,7 +16,7 @@ category_pipeline = pipeline(
 print("✅ Category model loaded successfully")
 
 # Define our categories
-CATEGORIES = ["billing", "technical", "performance", "general"]
+CATEGORIES = ["billing", "technical", "performance", "general", "feature_request"]
 
 
 def categorize_with_confidence(text: str) -> tuple[str, float]:

@@ -40,6 +40,10 @@ feedback.db
 .ipynb_checkpoints/
 *.ipynb
 
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
+
 # Environment variables
 .env
 .env.local
@@ -137,8 +141,5 @@ volumes/
 # Deployment artifacts
 commit_message.txt
 *.deploy
-
-# Screenshots folder if empty (remove this line when adding screenshots)
-screenshots/.gitkeep
 
 PHASE4_RESULTS.md

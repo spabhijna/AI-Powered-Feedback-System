@@ -13,10 +13,10 @@
 
 [Features](#-key-features) •
 [Quick Start](#-quick-start) •
+[Scheduler](#-automated-scheduler--scraping) •
 [Docker](#-docker-deployment) •
 [Documentation](#-api-documentation) •
-[Architecture](#-architecture) •
-[Demo](#-screenshots)
+[Architecture](#-architecture)
 
 </div>
 
@@ -27,9 +27,9 @@
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Architecture](#-architecture)
-- [Screenshots](#-screenshots)
 - [Quick Start](#-quick-start)
 - [Installation](#-installation)
+- [Automated Scheduler & Scraping](#-automated-scheduler--scraping)
 - [Docker Deployment](#-docker-deployment)
 - [API Documentation](#-api-documentation)
 - [Usage Examples](#-usage-examples)
@@ -38,6 +38,7 @@
 - [Technology Stack](#-technology-stack)
 - [AI Models](#-ai-model-details)
 - [Alert System](#-alert-system)
+- [Future Enhancements](#-future-enhancements)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -99,6 +100,30 @@ Traditional feedback systems rely on keyword matching and simple heuristics, whi
 - **Category Breakdown** visualization
 - **Priority Level Monitoring**
 - **Advanced Filtering** capabilities
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📥 Automated Data Ingestion
+- **Play Store Scraper** with automatic review collection
+- **App Store Scraper** for iOS app feedback
+- **Email Integration** via IMAP polling
+- **Scheduled Jobs** with APScheduler
+- **Retry Logic** with exponential backoff
+- **Error Tracking** with detailed status monitoring
+
+</td>
+<td width="50%">
+
+### ⚙️ Scheduler & Monitoring
+- **Web-Based Configuration** via dashboard UI
+- **Real-Time Status Monitoring** for all jobs
+- **Automatic Deduplication** using external IDs
+- **Granular Error Logging** with stack traces
+- **Flexible Scheduling** (hourly, daily, custom intervals)
+- **Health Check Endpoints** for system monitoring
 
 </td>
 </tr>
@@ -164,8 +189,12 @@ The system follows a modern, layered architecture designed for scalability and m
 | **Category Engine** | BART-MNLI | Zero-shot text classification for flexible categorization |
 | **Processing Pipeline** | Python async | Orchestrates AI models and business logic |
 | **Alert System** | Python | Real-time monitoring and threshold-based notifications |
+| **Scheduler** | APScheduler | Background job scheduling for automated data collection |
+| **Play Store Scraper** | google-play-scraper | Automated review collection from Google Play Store |
+| **App Store Scraper** | app-store-scraper | Automated review collection from Apple App Store |
+| **Email Ingestion** | IMAP | Feedback collection from email inbox |
 | **Frontend** | Vanilla JS + Chart.js | Responsive UI with data visualization |
-| **Database** | SQLite | Persistent storage for feedback and analytics |
+| **Database** | SQLite/PostgreSQL | Persistent storage for feedback, analytics, and scraper configs |
 
 ### Supported Categories
 
@@ -273,13 +302,251 @@ uvicorn app.main:app --reload
 - Interactive API docs: `http://127.0.0.1:8000/docs`
 - Alternative docs: `http://127.0.0.1:8000/redoc`
 
-#### 5. (Optional) Production Deployment
+#### 5. (Optional) Configure Environment Variables
+
+Copy the example environment file and customize:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` to configure your system:
+
+```bash
+# LLM API Configuration (for advanced AI analysis)
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# Database Configuration
+DATABASE_URL=sqlite://feedback.db
+
+# Scheduler Configuration (optional - enables automated scraping)
+SCHEDULER_ENABLED=true
+EMAIL_POLL_MINUTES=30
+
+# Play Store Scraping (optional)
+PLAY_STORE_APP_ID=com.yourapp.package
+PLAY_STORE_COUNT=50
+PLAY_STORE_SCRAPE_HOURS=6
+
+# App Store Scraping (optional)
+APP_STORE_APP_NAME=YourAppName
+APP_STORE_APP_ID=123456789
+APP_STORE_COUNTRY=us
+APP_STORE_COUNT=50
+APP_STORE_SCRAPE_HOURS=6
+
+# Email Ingestion (optional)
+EMAIL_HOST=imap.gmail.com
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+```
+
+**Key Configuration Options:**
+
+- **GROQ_API_KEY**: Optional. Uses Groq LLM for enhanced analysis. Falls back to local models if not set.
+- **SCHEDULER_ENABLED**: Set to `true` to enable automated scraping jobs
+- **Play Store / App Store**: Configure app IDs to automatically collect reviews
+- **Email Integration**: Set up IMAP credentials for email-based feedback ingestion
+
+#### 6. (Optional) Production Deployment
 
 For production, use multiple workers:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
+
+---
+
+## ⏰ Automated Scheduler & Scraping
+
+The system includes a powerful background scheduler for automated data collection from multiple sources.
+
+### Scheduler Overview
+
+The scheduler supports two configuration methods:
+
+1. **Environment Variables** (`.env` file) - Quick setup for simple use cases
+2. **Dashboard UI** (Database-backed) - Full control with monitoring and error tracking
+
+### Enable the Scheduler
+
+In your `.env` file:
+
+```bash
+SCHEDULER_ENABLED=true
+```
+
+### Configuration Methods
+
+#### Method 1: Environment Variables
+
+Configure scrapers directly in `.env`:
+
+```bash
+# Google Play Store
+PLAY_STORE_APP_ID=com.spotify.music
+PLAY_STORE_COUNT=50
+PLAY_STORE_SCRAPE_HOURS=6
+
+# Apple App Store  
+APP_STORE_APP_NAME=Spotify
+APP_STORE_APP_ID=324684580
+APP_STORE_COUNTRY=us
+APP_STORE_SCRAPE_HOURS=6
+
+# Email Polling
+EMAIL_HOST=imap.gmail.com
+EMAIL_USER=feedback@yourcompany.com
+EMAIL_PASS=your-app-password
+EMAIL_POLL_MINUTES=30
+```
+
+#### Method 2: Dashboard UI (Recommended)
+
+Create and manage scraper configurations via the API:
+
+```bash
+curl -X POST http://localhost:8000/sources/configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_type": "google_play",
+    "app_id": "com.spotify.music",
+    "country": "us",
+    "count": 50,
+    "interval_hours": 6,
+    "enabled": true,
+    "label": "Spotify Play Store Reviews"
+  }'
+```
+
+**Dashboard benefits:**
+- ✅ Real-time status monitoring with detailed error messages
+- ✅ Enable/disable scrapers without restarting
+- ✅ View execution history and success/failure counts
+- ✅ Retry count tracking for troubleshooting
+- ✅ Multiple configurations per source type
+
+### Monitoring Scraper Jobs
+
+#### View All Configurations
+
+```bash
+curl http://localhost:8000/sources/configs
+```
+
+Response includes detailed status:
+```json
+[
+  {
+    "id": 1,
+    "source_type": "google_play",
+    "app_id": "com.spotify.music",
+    "label": "Spotify Play Store Reviews",
+    "enabled": true,
+    "last_status": "success",
+    "last_run_at": "2026-02-25T15:30:00Z",
+    "last_run_count": 45,
+    "last_error": null,
+    "retry_count": 0,
+    "interval_hours": 6
+  }
+]
+```
+
+#### Check Scheduler Health
+
+```bash
+curl http://localhost:8000/sources/scheduler-health
+```
+
+Returns comprehensive system status:
+```json
+{
+  "scheduler_enabled": true,
+  "total_jobs": 4,
+  "jobs": {
+    "db_1": {
+      "next_run": "2026-02-25T21:30:00",
+      "status": "success"
+    }
+  },
+  "database_configs": [...],
+  "enabled_configs_count": 3
+}
+```
+
+### Scraper Features
+
+#### Automatic Deduplication
+
+All scrapers use `external_id` to prevent duplicate entries:
+- **Play Store**: Uses `reviewId` from Google API
+- **App Store**: Uses review ID from Apple API
+- **Email**: Uses message ID from IMAP
+
+#### Retry Logic with Exponential Backoff
+
+Failed scrapes automatically retry with increasing delays:
+- 1st retry: 1 second delay
+- 2nd retry: 2 seconds delay
+- 3rd retry: 4 seconds delay
+- After 3 failures: Error logged, job continues on schedule
+
+#### Error Tracking
+
+When a scraper fails, the system stores:
+- Full error message
+- Complete stack trace
+- Timestamp of failure
+- Consecutive failure count
+
+View errors via:
+```bash
+curl http://localhost:8000/sources/configs | jq '.[] | select(.last_error != null)'
+```
+
+### Manual Scraping
+
+Trigger one-time scrapes via API:
+
+```bash
+# Scrape Play Store
+curl -X POST http://localhost:8000/sources/scrape \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_type": "google_play",
+    "app_id": "com.spotify.music",
+    "count": 100,
+    "country": "us"
+  }'
+```
+
+**Timing**: Manual scrapes typically complete in 3-8 seconds for 50-100 reviews, depending on API response time.
+
+### Scheduler Logs
+
+Monitor scraper execution in real-time:
+
+```bash
+# View server logs
+uvicorn app.main:app --reload
+
+# You'll see detailed logs:
+# ✓ Registered DB scraper: Spotify Play Store [google_play / us] every 6h
+# Starting google_play scrape for: Spotify Play Store
+# Successfully scraped 45 Play Store reviews for com.spotify.music
+# Scraper 1 ingested: 45 processed, 12 skipped, 0 errors
+```
+
+### Best Practices
+
+1. **Start with dashboard configuration** for better monitoring
+2. **Set reasonable intervals** (6+ hours) to avoid rate limiting
+3. **Monitor retry counts** - high counts indicate API issues
+4. **Check last_error fields** regularly for troubleshooting
+5. **Use manual scraping** to test configuration before scheduling
 
 ### Troubleshooting
 
@@ -300,6 +567,47 @@ uvicorn app.main:app --port 8080 --reload
 # Ensure at least 2GB RAM is available for AI models
 # Close other applications if necessary
 ```
+
+**Issue: Scheduler jobs not running**
+```bash
+# Check scheduler is enabled
+curl http://localhost:8000/sources/scheduler-health | jq '.scheduler_enabled'
+
+# Verify SCHEDULER_ENABLED=true in .env file
+
+# Check scraper configuration status
+curl http://localhost:8000/sources/configs | jq '.[] | {label, enabled, last_status, last_error}'
+
+# Review server logs for scheduler startup messages
+```
+
+**Issue: Scraper showing errors**
+```bash
+# Check detailed error message
+curl http://localhost:8000/sources/configs | jq '.[] | select(.last_status == "error")'
+
+# Common errors:
+# - "App not found": Verify app_id is correct
+# - "Rate limited": Increase interval_hours (scraping too frequently)
+# - "Timeout": Network issues or API temporarily unavailable
+
+# Test with manual scrape to debug
+curl -X POST http://localhost:8000/sources/scrape \
+  -H "Content-Type: application/json" \
+  -d '{"source_type": "google_play", "app_id": "com.yourapp", "count": 10}'
+```
+
+**Question: How long does scraping take?**
+
+Manual scraping time (approximate):
+- **10-50 reviews**: 3-8 seconds
+- **100 reviews**: 10-15 seconds
+- **500+ reviews**: 30-60 seconds
+
+Performance depends on:
+- Network latency to Play Store / App Store APIs
+- Number of concurrent AI processing tasks
+- Server CPU and RAM availability
 
 ---
 ## 🐳 Docker Deployment
@@ -595,8 +903,16 @@ For detailed deployment instructions, see [`deployment/README.md`](deployment/RE
 | `GET` | `/feedback` | Retrieve feedback (with filters) | None |
 | `GET` | `/analytics` | Get aggregated analytics | None |
 | `POST` | `/upload` | Bulk upload via CSV | None |
+| `POST` | `/sources/scrape` | Trigger manual scrape | None |
+| `GET` | `/sources/status` | Get scheduler job status | None |
+| `GET` | `/sources/scheduler-health` | Detailed scheduler health check | None |
+| `GET` | `/sources/configs` | List all scraper configurations | None |
+| `POST` | `/sources/configs` | Create new scraper configuration | None |
+| `DELETE` | `/sources/configs/{id}` | Delete scraper configuration | None |
+| `PATCH` | `/sources/configs/{id}/toggle` | Enable/disable scraper | None |
+| `GET` | `/health` | System health check | None |
 | `GET` | `/docs` | Interactive API documentation | None |
-| `GET` | `/` | API health check | None |
+| `GET` | `/` | API root / welcome message | None |
 
 ---
 
@@ -749,37 +1065,67 @@ For a user-friendly interface:
 feedback_system/
 ├── app/                          # Main application package
 │   ├── __init__.py
-│   ├── main.py                  # FastAPI app initialization
-│   ├── models.py                # Tortoise ORM database models
+│   ├── main.py                  # FastAPI app initialization & lifespan
+│   ├── models.py                # Tortoise ORM models (Feedback, Alert, ScraperConfig)
 │   ├── schemas.py               # Pydantic request/response schemas
 │   ├── database.py              # Database configuration
 │   ├── api/                     # API layer
 │   │   ├── __init__.py
-│   │   └── routes.py            # REST API endpoints
+│   │   └── routes.py            # REST API endpoints (feedback, analytics, scheduler)
 │   └── services/                # Business logic layer
 │       ├── __init__.py
 │       ├── alerts.py            # Alert detection & handling
 │       ├── categorizer.py       # Category classification logic
 │       ├── category_model.py    # BART model loader & inference
-│       ├── ingestion.py         # Data ingestion utilities
+│       ├── ingestion.py         # Data ingestion & deduplication
+│       ├── llm_service.py       # Groq LLM integration
 │       ├── priority.py          # Priority scoring algorithm
 │       ├── processing.py        # Main processing pipeline
+│       ├── report_generator.py  # PDF report generation
+│       ├── scheduler.py         # APScheduler job management
 │       ├── sentiment.py         # Sentiment analysis logic
-│       └── sentiment_model.py   # DistilBERT model loader
+│       ├── sentiment_model.py   # DistilBERT model loader
+│       ├── trend_analysis.py    # Trend detection algorithms
+│       └── scrapers/            # Data collection scrapers
+│           ├── __init__.py
+│           ├── app_store_scraper.py    # Apple App Store reviews
+│           ├── play_store.py           # Google Play Store reviews
+│           └── web_scraper.py          # Generic web scraping
+├── dashboard/                    # Streamlit dashboard (optional)
+│   ├── Home.py                  # Dashboard main page
+│   ├── requirements.txt         # Dashboard dependencies
+│   ├── pages/                   # Multi-page dashboard
+│   │   ├── 1_Analytics.py
+│   │   ├── 2_Feedback_Browser.py
+│   │   ├── 3_Trends.py
+│   │   ├── 4_Sources.py
+│   │   └── 5_Reports.py
+│   └── utils/
+│       └── api_client.py        # API communication helpers
 ├── static/                       # Frontend assets
 │   ├── index.html               # Dashboard UI
 │   ├── styles.css               # Styling (light/dark themes)
-│   └── app.js                   # Frontend JavaScript logic
+│   ├── app.js                   # Frontend JavaScript logic
+│   └── config.js                # Frontend configuration
+├── deployment/                   # Deployment documentation
+│   └── README.md                # Production deployment guide
 ├── screenshots/                  # Documentation screenshots
-│   ├── README.md                # Screenshot guidelines
-│   ├── dashboard.png            # (Add your screenshots here)
-│   ├── analytics.png
-│   ├── dark-mode.png
-│   ├── bulk-upload.png
-│   └── processing.png
+│   └── README.md                # Screenshot guidelines
+├── tests/                        # Test suite
+│   ├── __init__.py
+│   ├── test_processing.py       # Processing pipeline tests
+│   ├── test_routes.py           # API endpoint tests
+│   └── test_trend_analysis.py   # Trend analysis tests
+├── data/                         # Data directory (gitignored)
+├── .env                          # Environment configuration (gitignored)
+├── .env.example                  # Example environment configuration
 ├── test_*.csv                    # Sample test CSV files
+├── docker-compose.yml            # Docker Compose configuration
+├── Dockerfile                    # Backend container definition
+├── Dockerfile.dashboard          # Dashboard container definition
 ├── pyproject.toml                # Project metadata & dependencies
 ├── README.md                     # This file
+├── PHASE4_RESULTS.md            # Phase 4 development results
 ├── .gitignore                    # Git ignore rules
 ├── .venv/                        # Virtual environment (gitignored)
 └── feedback.db                   # SQLite database (gitignored)
@@ -789,16 +1135,22 @@ feedback_system/
 
 | File | Purpose |
 |------|--------|
-| `app/main.py` | FastAPI application setup, CORS, startup events |
-| `app/models.py` | Database schema definition (Feedback table) |
+| `app/main.py` | FastAPI application setup, CORS, lifespan events, DB initialization |
+| `app/models.py` | Database schema (Feedback, Alert, ScraperConfig) |
 | `app/schemas.py` | API request/response validation models |
-| `app/api/routes.py` | REST endpoint implementations |
-| `app/services/processing.py` | Orchestrates sentiment, category, priority |
+| `app/api/routes.py` | REST endpoint implementations (feedback, analytics, scheduler APIs) |
+| `app/services/processing.py` | Orchestrates sentiment, category, priority analysis |
+| `app/services/scheduler.py` | Background job scheduling with APScheduler |
+| `app/services/ingestion.py` | Multi-source data ingestion with deduplication |
+| `app/services/scrapers/*` | Automated data collection from Play Store, App Store, web |
 | `app/services/sentiment_model.py` | DistilBERT model singleton |
 | `app/services/category_model.py` | BART model singleton |
+| `app/services/llm_service.py` | Groq LLM API integration for advanced analysis |
 | `app/services/alerts.py` | Threshold-based alert triggering |
-| `static/index.html` | Dashboard SPA with charts |
-| `static/app.js` | API calls, chart rendering, theme toggle |
+| `app/services/trend_analysis.py` | Trend detection and spike analysis |
+| `dashboard/` | Streamlit-based interactive dashboard |
+| `static/` | Vanilla JS dashboard (alternative to Streamlit) |
+| `.env` | Configuration for API keys, database, scheduler settings |
 
 ---
 
@@ -810,27 +1162,33 @@ feedback_system/
 |-----------|----------------|-------|
 | Single feedback analysis | 2-3 seconds | Includes both AI models |
 | Bulk CSV upload (15 items) | 40-45 seconds | ~3 seconds per item |
+| Play Store scraping (50 reviews) | 3-8 seconds | Network dependent |
+| Play Store scraping (100 reviews) | 10-15 seconds | Includes AI processing |
 | Analytics retrieval | <100ms | Database query only |
+| Scheduler health check | <50ms | Fast status query |
 | First request (cold start) | 5-7 seconds | Model loading overhead |
 | Subsequent requests | 2-3 seconds | Models cached in memory |
 
 ### Resource Usage
 
 **Memory:**
-- **Runtime (with models loaded)**: ~1.5 GB
+- **Runtime (with models loaded)**: ~1.8-2 GB
   - Base Python + FastAPI: ~50 MB
   - DistilBERT model: ~268 MB
   - BART-MNLI model: ~1.6 GB
+  - APScheduler: ~10 MB
 - **Disk cache**: ~2 GB (models stored in `~/.cache/huggingface/`)
 
 **CPU:**
 - **Model inference**: High CPU usage during analysis
+- **Scraper execution**: Moderate CPU during data collection
 - **Idle**: Minimal CPU usage
 - **Recommendation**: 2+ CPU cores for optimal performance
 
 ### Startup Performance
 
 - **Cold start**: 3-5 seconds (initial model loading)
+- **With scheduler**: 4-6 seconds (includes DB initialization)
 - **Hot reload**: Instant (models persist in memory)
 - **First-time setup**: 1-2 minutes (model download from Hugging Face)
 
@@ -844,10 +1202,11 @@ feedback_system/
 
 ### Scalability Considerations
 
-- **Current design**: Single-threaded processing per request
-- **Recommended for**: <100 requests/minute
+- **Current design**: Single-threaded processing per request; background scheduler runs in separate threads
+- **Recommended for**: <100 requests/minute for API; unlimited for scheduled scraping
 - **For higher loads**: Consider deploying with multiple workers or using a task queue (Celery, Redis)
-- **Database**: SQLite suitable for <10k feedback items; consider PostgreSQL for production
+- **Database**: SQLite suitable for <10k feedback items; PostgreSQL recommended for production with >10k items
+- **Scheduler**: APScheduler runs jobs in background threads; suitable for small to medium workloads
 
 ---
 
@@ -879,6 +1238,15 @@ feedback_system/
 |------------|---------|--------|
 | **Pandas** | <3.0 | CSV processing |
 | **NumPy** | <2.0 | Numerical operations |
+
+### Automation & Scheduling
+
+| Technology | Version | Purpose |
+|------------|---------|--------|
+| **APScheduler** | 3.10+ | Background job scheduling |
+| **google-play-scraper** | 1.2.7+ | Play Store review scraping |
+| **app-store-scraper** | Latest | App Store review scraping |
+| **imaplib** | Built-in | Email inbox polling via IMAP |
 
 ### Frontend
 
@@ -1087,6 +1455,14 @@ SPIKE_TIME_WINDOW = 3600  # 1 hour
 
 ## 🔮 Future Enhancements
 
+### ✅ Recently Completed
+
+- **Automated Data Collection** - Play Store, App Store, and email scraping with APScheduler
+- **Scheduler Management** - Web-based configuration with real-time monitoring
+- **Error Tracking** - Comprehensive error logging with retry logic and exponential backoff
+- **Health Monitoring** - Dedicated endpoints for scheduler and job status tracking
+- **Docker Deployment** - Production-ready containerization with docker-compose
+
 ### 🚧 Planned Features
 
 #### Phase 1: Notifications & Integrations
@@ -1144,23 +1520,6 @@ SPIKE_TIME_WINDOW = 3600  # 1 hour
 - A/B testing feedback analysis
 
 ---
-
-## 📝 CSV Upload Format
-
-The system accepts CSV files with the following format:
-
-```csv
-text
-"Your feedback text here"
-"Another piece of feedback"
-```
-
-Optional fields:
-```csv
-text,source
-"Feedback text","email"
-"Another feedback","mobile app"
-```
 
 ## 🤝 Contributing
 
