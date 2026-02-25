@@ -1619,6 +1619,12 @@ This project stands on the shoulders of giants:
 
 ---
 
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
 <div align="center">
 
 ### 🚀 Built with ❤️ using AI and Modern Web Technologies
